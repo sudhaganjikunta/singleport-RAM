@@ -1,0 +1,42 @@
+module tb;
+parameter data_width = 32;
+parameter depth =16;
+parameter addr_width=4;
+
+reg clk;
+reg [addr_width-1:0]address;
+reg [data_width-1:0]data_in;
+reg write_en,read_en;
+wire [data_width-1:0] data_out;
+
+integer i;
+single_port_ram dut(.clk(clk),.address(address),.data_in(data_in),.write_en(write_en),
+                  .read_en(read_en),.data_out(data_out));
+                  
+                  
+ always #5 clk=~clk;
+ 
+ initial begin
+ $monitor("clk : %0b;address :%d ; data-in:%d ;write en:%d ;read-en:%d ;data-out:%d ",
+               clk,address,data_in,write_en,read_en,data_out);
+               
+ clk=0;address=0;data_in=0;write_en=0;read_en=0;
+ #10 write_en=1;
+ 
+ for(i=0;i<16;i=i+1)begin
+ address=i;
+ //data_in=$random;               //it can give both +ve & -ve values (signed values)
+ data_in=$urandom_range(12,200);  // it gives only +ve values
+ #10;
+ end
+ 
+ #10 write_en =0;read_en=1;
+ for(i=0;i<2** addr_width;i=i+1)begin
+ address=i;
+ #10;
+ end
+ #10 read_en=0;
+ #500 $finish;
+ end
+   
+endmodule
